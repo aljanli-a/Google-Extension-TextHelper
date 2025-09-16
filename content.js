@@ -11,6 +11,7 @@
         </div>
     `;
     document.body.appendChild(tooltip);
+    tooltip.style.display = "none";
 
     let selectedText = "";
     let isLarge = false;
@@ -19,6 +20,12 @@
     function highlightSelected(text, selected) {
         const escaped = selected.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         return text.replace(new RegExp(escaped, 'gi'), match => `<b>${match}</b>`);
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text == null ? '' : String(text);
+        return div.innerHTML;
     }
 
     function fetchAnswer(mode) {
@@ -38,7 +45,7 @@
             .then(res => res.json())
             .then(data => {
                 if (mode === currentMode) {
-                    answerDiv.innerHTML = highlightSelected(data.answer, selectedText);
+                    answerDiv.innerHTML = highlightSelected(escapeHtml(data.answer), selectedText);
                     answerDiv.style.fontSize = "13px";
                     // Показываем кнопки после загрузки
                     controls.style.display = "flex";
@@ -72,7 +79,7 @@
         const parentNode = range.commonAncestorContainer.parentNode;
 
         const ignoreTags = ["BUTTON", "A", "INPUT", "TEXTAREA", "SELECT", "VIDEO", "IFRAME", "IMG"];
-        if (ignoreTags.includes(parentNode.tagName)) {
+        if (parentNode && parentNode.tagName && ignoreTags.includes(parentNode.tagName)) {
             tooltip.style.display = "none";
             return;
         }
